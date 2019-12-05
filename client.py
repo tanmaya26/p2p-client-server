@@ -43,7 +43,7 @@ def lookup_request(rfc_number, rfc_title):
 
 
 def list_request():
-    message = "LIST ALL RFC " + " P2P-CI/1.0\r\n" + "Host: " + str(client_hostname) + "\r\n" + \
+    message = "LIST ALL RFC " + "P2P-CI/1.0\r\n" + "Host: " + str(client_hostname) + "\r\n" + \
               "Port: " + str(upload_port_number) \
               + "\r\n"
     return message
@@ -144,8 +144,10 @@ def client_input():
             request_message = pickle.dumps(request_list, -1)
             client_socket.sendall(request_message)
             response = client_socket.recv(1024)
+            response_message = pickle.loads(response)
             print "ADD Response from the server"
-            print response
+            for r in response_message:
+                print r
         else:
             print "File Not Present in the directory"
         client_input()
@@ -160,8 +162,10 @@ def client_input():
         request_message = pickle.dumps(request_list, -1)
         client_socket.sendall(request_message)
         response = client_socket.recv(1024)
+        response_message = pickle.loads(response)
         print "LOOKUP Response from the server"
-        print response
+        for r in response_message:
+            print r
         client_input()
 
     elif service == 'LIST':
@@ -170,8 +174,10 @@ def client_input():
         request_message = pickle.dumps(request_list, -1)
         client_socket.sendall(request_message)
         response = client_socket.recv(1024)
-        print "LIST ALL Response from the server"
-        print response
+        response_message = pickle.loads(response)
+        print "LIST Response from the server"
+        for r in response_message:
+            print r
         client_input()
 
     elif service == 'GET':
@@ -231,8 +237,10 @@ def send_peer_info(client_socket, directory):
     info_add = pickle.dumps(all_requests, -1)
     client_socket.sendall(info_add)
     response_received = client_socket.recv(1024)
-    print "ADD Response sent from the server"
-    print response_received
+    response_message = pickle.loads(response_received)
+    print "ADD Response from the server"
+    for r in response_message:
+        print r
 
 
 data = pickle.dumps([upload_port_number])
