@@ -202,8 +202,10 @@ def client_input():
             request_message = pickle.dumps(request_list, -1)
             client_socket.sendall(request_message)
             response = client_socket.recv(1024)
-            print "ADD Response from the server"
-            print response
+            response_message = pickle.loads(response)
+            print "LOOKUP Response from the server"
+            for r in response_message:
+                print r
         else:
             print "File Not Present in the directory"
         client_input()

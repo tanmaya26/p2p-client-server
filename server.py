@@ -61,13 +61,13 @@ def list_peers():
         message = "P2P-CI/1.0 200 OK"
         message += '\r\n'
         for rfc_number in rfc_index.keys():
-            peer_host = rfc_number[0]
-            rfc_title = rfc_number[1]
-
-            if peer_host in active_peers.keys():
-                peer_upload_port = active_peers[peer_host]
-                response = generate_response(rfc_number, peer_host, peer_upload_port, rfc_title)
-                message += response
+            for rfc in rfc_index[rfc_number]:
+                peer_host = rfc[0]
+                rfc_title = rfc[1]
+                if peer_host in active_peers.keys():
+                    peer_upload_port = active_peers[peer_host]
+                    response = generate_response(rfc_number, peer_host, peer_upload_port, rfc_title)
+                    message += response
     message += '\r\n'
     return message
 
@@ -87,7 +87,7 @@ def client_connection(connection, addr):
             elif message[0:3] == 'ADD':
                 message_data = message.split('\r\n')
                 print message_data
-                if (len(message_data) == 5) and "ADD RFC" in message_data[0] and "Host:" in message_data[
+                if len(message_data) == 5 and "ADD RFC" in message_data[0] and "Host:" in message_data[
                     1] and "Port:" in \
                         message_data[2] and "Title:" in message_data[3]:
 
@@ -114,7 +114,7 @@ def client_connection(connection, addr):
 
             elif message[0:4] == 'LOOK':
                 message_data = message.split('\r\n')
-                if (len(message_data) == 5) and "LOOKUP" in message_data[0] and "Host:" in message_data[
+                if len(message_data) == 5 and "LOOKUP" in message_data[0] and "Host:" in message_data[
                     1] and "Port:" in \
                         message_data[2] and "Title:" in message_data[3]:
                     if 'P2P-CI/1.0' in message_data[0]:
@@ -134,7 +134,7 @@ def client_connection(connection, addr):
             elif message[0:4] == 'LIST':
                 message_data = message.split('\r\n')
                 print(message_data)
-                if (len(message_data) == 4) and "LIST ALL" in message_data[0] and "Host:" in message_data[
+                if len(message_data) == 4 and "LIST ALL" in message_data[0] and "Host:" in message_data[
                     1] and "Port:" in message_data[2]:
                     if 'P2P-CI/1.0' in message_data[0]:
                         response = list_peers()
