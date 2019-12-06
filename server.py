@@ -86,7 +86,6 @@ def client_connection(connection, addr):
                 break
             elif message[0:3] == 'ADD':
                 message_data = message.split('\r\n')
-                print message_data
                 if len(message_data) == 5 and "ADD RFC" in message_data[0] and "Host:" in message_data[
                     1] and "Port:" in \
                         message_data[2] and "Title:" in message_data[3]:
@@ -133,7 +132,6 @@ def client_connection(connection, addr):
 
             elif message[0:4] == 'LIST':
                 message_data = message.split('\r\n')
-                print(message_data)
                 if len(message_data) == 4 and "LIST ALL" in message_data[0] and "Host:" in message_data[
                     1] and "Port:" in message_data[2]:
                     if 'P2P-CI/1.0' in message_data[0]:

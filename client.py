@@ -5,8 +5,9 @@ import random
 from thread import *
 import platform
 import time
-import email.utils
 import sys
+import datetime
+from email import utils
 
 serverPort = 7734
 serverName = sys.argv[1]
@@ -21,6 +22,15 @@ def connect():
 
 
 client_socket = connect()
+
+
+def rfc_date():
+    now = datetime.datetime.now()
+    now_tuple = now.timetuple()
+    now_timestamp = time.mktime(now_tuple)
+    date = utils.formatdate(now_timestamp, usegmt=True)
+    return date
+
 
 print 'Connected to server at: ' + str(serverName) + " and port: " + str(serverPort)
 client_hostname = client_socket.getsockname()[0]
@@ -82,46 +92,53 @@ def upload():
                 if request[0] == 'GET':
                     rfc_number = request[2]
                     rfc_file_path = os.getcwd() + "/" + directory + "/RFC" + rfc_number + ".txt"
-                    opened_file = open(rfc_file_path, 'r')
-                    file_data = opened_file.read()
-                    response = "P2P-CI/1.0 200 OK\r\n" \
-                               "Date: " + str(email.utils.formatdate(usegmt=True)) + "\r\n" \
-                                                                                     "OS: " + str(
-                        platform.platform()) + "\r\n" \
-                                               "Last-Modified: " + str(
-                        time.ctime(os.path.getmtime(rfc_file_path))) + "\r\n" \
-                                                                       "Content-Length: " + str(len(file_data)) + "\r\n" \
-                                                                                                                  "Content-Type: text/plain\r\n"
-                    response = response + file_data
+                    try:
+                        opened_file = open(rfc_file_path, 'r')
+                        file_data = opened_file.read()
+                        response = "P2P-CI/1.0 200 OK\r\n" \
+                                   "Date: " + str(rfc_date()) + "\r\n" \
+                                                                "OS: " + str(
+                            platform.platform()) + "\r\n" \
+                                                   "Last-Modified: " + str(
+                            time.ctime(os.path.getmtime(rfc_file_path))) + "\r\n" \
+                                                                           "Content-Length: " + str(
+                            len(file_data)) + "\r\n" \
+                                              "Content-Type: text/plain\r\n"
+                        response = response + file_data
 
-                    download_socket.sendall(response)
+                        download_socket.sendall(response)
+                    except IOError:
+                        print 'File not found'
+                        response = 'File with ' + rfc_number + ' not found'
+                        download_socket.sendall(response)
+
             else:
                 response = "505 P2P-CI Version Not Supported\r\n"
-                download_socket.send(response)
+                download_socket.sendall(response)
         else:
             response = "400 Bad Request\r\n"
-            download_socket.send(response)
+            download_socket.sendall(response)
 
 
 def download_rfc(request, peer_hostname, peer_port, rfc_number):
     peer_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     peer_socket.connect((peer_hostname, int(peer_port)))
-    # print 'Connected to server at: ' + str(peer_hostname) + " and port: " + str(peer_port)
     connect_msg = peer_socket.recv(1024)
     print connect_msg
     peer_socket.sendall(request)
     peer_response = peer_socket.recv(1024)
+    get_response = peer_response[:peer_response.find('text/plain\r\n') + 12]
+    print 'GET response from peer'
+    print get_response
     if '200 OK' in peer_response.split("\r\n")[0]:
-        print 'P2P-CI/1.0 200 OK'
         content_line = (peer_response.split("\r\n"))[4]
         content_length = int(content_line.split(' ')[1])
         peer_response = peer_response + peer_socket.recv(content_length)
         rfc_file_path = os.getcwd() + "/" + directory + "/RFC" + rfc_number + ".txt"
         data = peer_response[peer_response.find('text/plain\r\n') + 12:]
-
         with open(rfc_file_path, 'w') as file:
             file.write(data)
-        print 'File Received from peer and stored locally now'
+        print 'Download Success !'
     elif 'Version Not Supported' in peer_response.split("\r\n")[0]:
         print 'Version Not Supported'
     elif 'Bad Request' in peer_response.split("\r\n")[0]:
@@ -191,7 +208,7 @@ def client_input():
         peer_port = raw_input()
 
         download_req = get_request(rfc_number)
-        print "GET Request to be sent to the peer having the RFC File"
+        print "GET Request sent to the peer having the RFC File"
         print download_req
 
         download_rfc(download_req, peer_hostname, peer_port, rfc_number)
@@ -203,7 +220,7 @@ def client_input():
             client_socket.sendall(request_message)
             response = client_socket.recv(1024)
             response_message = pickle.loads(response)
-            print "LOOKUP Response from the server"
+            print "GET Response from the server"
             for r in response_message:
                 print r
         else:
@@ -222,8 +239,6 @@ def client_input():
 
 
 def send_peer_info(client_socket, directory):
-    rfc_numbers = []
-    rfc_titles = []
     all_requests = []
     rfc_storage_path = os.getcwd() + "/" + directory
     for file_name in os.listdir(rfc_storage_path):
@@ -233,7 +248,7 @@ def send_peer_info(client_socket, directory):
             req_message = add_request(rfc_number, rfc_title)
             print "ADD Request to be sent to the server"
             print req_message
-            #information_list = [req_message]
+            # information_list = [req_message]
             all_requests.append(req_message)
 
     info_add = pickle.dumps(all_requests, -1)
