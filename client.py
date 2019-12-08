@@ -238,7 +238,7 @@ def client_input():
         client_input()
 
 
-def send_peer_info(client_socket, directory):
+def send_add_request(client_socket, directory):
     all_requests = []
     rfc_storage_path = os.getcwd() + "/" + directory
     for file_name in os.listdir(rfc_storage_path):
@@ -255,8 +255,8 @@ def send_peer_info(client_socket, directory):
     client_socket.sendall(info_add)
     response_received = client_socket.recv(1024)
     response_message = pickle.loads(response_received)
-    print "ADD Response from the server"
     for r in response_message:
+        print "ADD Response from the server"
         print r
 
 
@@ -265,7 +265,7 @@ data = pickle.dumps([upload_port_number])
 client_socket.send(data)
 # client_socket.close()
 
-send_peer_info(client_socket, directory)
+send_add_request(client_socket, directory)
 upload_socket = upload_socket_bind()
 
 start_new_thread(upload, ())

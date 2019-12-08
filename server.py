@@ -175,14 +175,3 @@ while 1:
     start_new_thread(client_connection, (connection_socket, addr))
 
 server_socket.close()
-client_threads = []
-# try:
-#     while True:
-#         conn, addr = server_socket.accept()
-#         client_thread = threading.Thread(target=client_connection, args=[conn, addr])
-#         client_thread.start()
-#         client_threads.append(client_thread)
-# finally:
-#     server_socket.close()
-#     for client_thread in client_threads:
-#         client_thread.join()
