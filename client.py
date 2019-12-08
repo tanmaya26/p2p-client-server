@@ -159,6 +159,8 @@ def client_input():
             request = add_request(rfc_number, rfc_title)
             request_list = [request]
             request_message = pickle.dumps(request_list, -1)
+            print "ADD Request to be sent to the server"
+            print request
             client_socket.sendall(request_message)
             response = client_socket.recv(1024)
             response_message = pickle.loads(response)
@@ -177,6 +179,8 @@ def client_input():
         request = lookup_request(rfc_number, rfc_title)
         request_list = [request]
         request_message = pickle.dumps(request_list, -1)
+        print "LOOKUP Request to be sent to the server"
+        print request
         client_socket.sendall(request_message)
         response = client_socket.recv(1024)
         response_message = pickle.loads(response)
@@ -189,6 +193,8 @@ def client_input():
         request = list_request()
         request_list = [request]
         request_message = pickle.dumps(request_list, -1)
+        print "LIST Request to be sent to the server"
+        print request
         client_socket.sendall(request_message)
         response = client_socket.recv(1024)
         response_message = pickle.loads(response)
@@ -208,7 +214,7 @@ def client_input():
         peer_port = raw_input()
 
         download_req = get_request(rfc_number)
-        print "GET Request sent to the peer having the RFC File"
+        print "GET Request to be sent to the peer having the RFC File"
         print download_req
 
         download_rfc(download_req, peer_hostname, peer_port, rfc_number)
