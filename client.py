@@ -111,7 +111,6 @@ def upload():
 
                             download_socket.sendall(response)
                         except IOError:
-                            print 'File not found'
                             response = "File not found\r\n"
                             download_socket.sendall(response)
 
@@ -133,15 +132,12 @@ def download_rfc(request, peer_hostname, peer_port, rfc_number):
     print connect_msg
     peer_socket.sendall(request)
     peer_response = peer_socket.recv(1024)
-    get_response = peer_response[:peer_response.find('text/plain\r\n') + 12]
     if 'Bad Request' in peer_response.split("\r\n")[0]:
-        print '400 Bad Request'
+        print peer_response.split("\r\n")[0]
     if 'Version Not Supported' in peer_response.split("\r\n")[0]:
-        print 'Version Not Supported'
+        print peer_response.split("\r\n")[0]
     if 'File not' in peer_response.split("\r\n")[0]:
-        print 'File Not Found'
-    print 'GET response from peer'
-    print get_response
+        print peer_response.split("\r\n")[0]
     if '200 OK' in peer_response.split("\r\n")[0]:
         content_line = (peer_response.split("\r\n"))[4]
         content_length = int(content_line.split(' ')[1])
