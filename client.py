@@ -127,7 +127,11 @@ def upload():
 
 def download_rfc(request, peer_hostname, peer_port, rfc_number):
     peer_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    peer_socket.connect((peer_hostname, int(peer_port)))
+    try:
+        peer_socket.connect((peer_hostname, int(peer_port)))
+    except socket.error as msg:
+        print("Socket binding error" + str(msg) + "\n" + "Retrying...")
+        return
     connect_msg = peer_socket.recv(1024)
     print connect_msg
     peer_socket.sendall(request)
